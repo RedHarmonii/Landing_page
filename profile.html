@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@100;300;400&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/917be88e2a.js" crossorigin="anonymous"></script>
+
+    <style>
+        .network-container{
+            position:fixed;
+            top:0; left:0;
+            width: 100%; height:100%;
+            background: linear-gradient(#3d3d3dd3,#000000e5);
+            overflow: hidden;
+            z-index: -1;
+        }
+        .node{
+            position: absolute;
+            width: 8px; height: 8px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .connection{
+            position: absolute;
+            background: rgba(255, 255, 255, 0.767);
+            transform-origin: 0 0;
+            pointer-events: none;
+        }
+        .pulse{
+            animation: pulse 3s infinite;
+        }
+        @keyframes pulse{
+            0%,100%{transform: scale(1); opacity: 0.8;}
+            50%{transform: scale(1.5);opacity: 0.4;}
+        }
+
+        h1{
+            text-align: center;
+            font-size:50px;
+            margin-block-start: 300px;
+        }
+        h2{
+            text-align: center;
+            font-size: 18px;
+        }
+        .sliding-container{
+            position: relative;
+            width: 100%;
+            max-width: fit-content;
+            padding: 20px;
+            margin: 50px auto;
+            margin-top: 400px;
+            margin-bottom: 400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        .text-content{
+            width:40%;
+            opacity: 0;
+            transform: translateX(-200%);
+            color:black;
+            font-family: "Tomorrow",Arial, Helvetica, sans-serif;
+            transition: all 2s ease-out 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+        .image-content {
+            width: 40%;
+            display: flex;
+            gap: 20px;
+            opacity: 0;
+            transform: translateX(200%);
+            transition: all 2s ease-out 0.3s;
+        }
+        .slide-in{
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .sliding-container:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+        @media (max-width: 768px) {
+            .sliding-container, 
+            .sliding-container:nth-child(even) {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .text-content, .image-content {
+                width: 100%;
+            }
+            .image-content {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!--Build graph background-->
+    <div class="network-container" id="networkContainer"></div>
+    <script>
+        class Node{
+            constructor(x, y,speedX,speedY){
+                this.x = x;
+                this.y = y;
+                this.speedX = speedX;
+                this.speedY = speedY;
+                this.element = document.createElement('div');
+                this.element.className = 'node';
+                this.element.style.left = `${x}px`;
+                this.element.style.top = `${y}px`;
+            }
+
+            update(width,height){
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x <= 0 || this.x >= width) this.speedX *= -1;
+                if (this.y <= 0 || this.y >= height) this.speedY *= -1;
+
+                this.element.style.left = `${this.x}px`;
+                this.element.style.top = `${this.y}px`;
+            }
+        }
+        class Connection {
+            constructor(nodeA, nodeB) {
+                this.nodeA = nodeA;
+                this.nodeB = nodeB;
+                this.element = document.createElement('div');
+                this.element.className = 'connection';
+            }
+
+            update() {
+                const dx = this.nodeB.x - this.nodeA.x;
+                const dy = this.nodeB.y - this.nodeA.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+
+                this.element.style.width = `${distance}px`;
+                this.element.style.height = '1px';
+                this.element.style.left = `${this.nodeA.x + 4}px`;
+                this.element.style.top = `${this.nodeA.y + 4}px`;
+                this.element.style.transform = `rotate(${angle}rad)`;
+
+                // Adjust opacity based on distance
+                const opacity = Math.max(0, 1 - distance / 300);
+                this.element.style.opacity = opacity;
+            }
+        }
+        class NN{
+            constructor(container,count){
+                this.container = container;
+                this.width = container.offsetWidth;
+                this.height = container.offsetHeight;
+                this.nodes = [];
+                this.connections = [];
+                
+                //build the nodes
+                for(let i = 0; i < count; i++){
+                    const x = Math.random() * this.width;
+                    const y = Math.random() * this.height;
+                    const speedX = (Math.random() - 0.5) * 2;
+                    const speedY = (Math.random() - 0.5) * 2;
+                    const node = new Node(x, y, speedX, speedY);
+                    this.nodes.push(node);
+                    this.container.appendChild(node.element);
+
+                    if(Math.random() <= 0.3){
+                        node.element.classList.add('pulse');
+                    }
+                }
+
+                //build the connections
+                for(let i = 0; i < this.nodes.length; i++){
+                    for(let j = i+1; j < this.nodes.length; j++){
+                        const connection = new Connection(this.nodes[i], this.nodes[j]);
+                        this.connections.push(connection);
+                        this.container.appendChild(connection.element);
+                    }
+                }
+            }
+            //animation 
+            animate(){
+                this.nodes.forEach(node => node.update(this.width,this.height));
+
+                this.connections.forEach(connection => connection.update());
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        const container = document.getElementById('networkContainer');
+        const network = new NN(container, 20);
+        network.animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            network.width = container.offsetWidth;
+            network.height = container.offsetHeight;
+        });
+    </script>
+    
+    <h1> Hi, My Name is Saurav Kumar</h1>
+    <h2>I'm a UNLV graduate with a double Bachelor in Math and Computer Science. I'm Interested in Data Analytics and Data Science fields.</h2>
+    <h2>I've worked as a Data Structures Tutor breaking down complex problems while explaining solutions to undergraduates.</h2>
+    <h2>I'm also US Marine Corps Veteran with experience leading teams in highly stressful situations.</h2>
+
+
+    <div class="sliding-container">
+        <div class="text-content">
+            
+            <h2>Background</h2>
+            <p>
+                After High School, I joined United States Marine Corps as an Infantry Assualtman. Once I had
+                completed my training, I was staitioned at Nellis Air-force Base in Las Vegas, Nevada.
+                <br><br> 
+                After my 3rd year, My unit was deployed to Japan/Korea. At the time, 
+                I was 21 and had become a team leader encharge of training and leading a small-unit of marines.
+                During preparation, I led my team of marines through live-fire operations conduncted on realistic terrain such
+                as mountainous desert terrain and urban cities.
+                <br><br>
+                While overseas, I got to work with Japanese Defense Force and 
+                Republic of Korea(ROK) Marines conduncting joint operations over a course of few months.
+                I also trained up to be become a brown-belt in Marine Corps Matrial Arts and trained in Jungle Warfare.
+            </p>
+        </div>
+
+        <div class="image-content">
+            <img src="images/USMC.svg" width="30%">
+            <img src="images/pic1.jpg" width="25%">
+            <img src="images/pic2.jpg" width="40%">
+            
+        </div>
+    </div>
+
+    <div class="sliding-container">
+        <div class="text-content">
+            <h2>Educaton</h2>
+            <p>
+                I began my studies at Collage of Southern Nevada pursuing an Associate of Science.
+                During which, I began learning C++ prior to any Computer Science course while working
+                as a part-time manager in my family business. 
+                <br><br>
+                After my associates, I transferred to
+                University of Nevada, Las Vegas to pursue a Bachelor in Math and Computer Science. Immediatly after
+                completing my Data Structures and Algorithms course, I was hired as Computer Science Tutor at UNLV Academic Success Center.
+                <br><br>
+                For two years, I tutored over 30 students weekly in concepts such as array manipulation, linked lists,
+                binary trees, hash maps, and graph traversal.
+            </p>
+        </div>
+
+        <div class="image-content">
+            <img src="images/csn.png" width="30%"height="20%">
+            <img src="images/unlv.png"width="40%"height="20%">
+            <img src="images/unlv acs.png" width="60%" height="50%">
+        </div>
+    </div>
+
+    <div class="sliding-container">
+        <div class="text-content">
+            <h2>Interests</h2>
+            <p>
+                I've always had an interest in Math, in particular Statistics and Probability. I took multiple
+                statistical courses where i learned topics including normal, poison, gamma, and beta distrubutions, 
+                linear/logistic regression, and Hypothesis Testing. 
+                <br><br>
+                I also took mutiple data science/data analytics courses at UNLV to further expand my knowledge and skills.
+                I took database managment systems where i used SQL. I also took machine learning and data mining over a year
+                covering topics including Supervised Learning(KNN, SVM, regression, Decision Tree, neural network) and Unsupervised Learning(K-means, DBSCAN, Apriori).
+            </p>
+        </div>
+
+        <div class="image-content">
+            <img src="images/graph.png" width="30%">
+            <img src="images/math.jpg" width="35%">
+            
+        </div>
+    </div>
+
+    <div class="sliding-container">
+        <div class="text-content">
+            <h2>Skills</h2>
+            <p>
+                I'm proficient in C/C++, Python, SQL, R. I also have experience using google colab, linux, HTML/CSS.
+                I'm also familiar with machine learning algorithms and frameworks like TensorFlow,pandas,seaborn and Scikit-learn.
+                <br><br>
+                As for soft skills, I've taught as a Data Structures Tutor at UNLV for 2 years while pursuing both of my Bachelor degrees. So i'm very accustomed
+                to public speaking while also being able to breaking down problems and conveying my thought process on problems.
+            </p>
+        </div>
+
+        <div class="image-content">
+            <img src="/images/c++.png"width="25%"height="25%">
+            <img src="/images/python.png"width="25%"height="25%">
+            <img src="/images/sql.png"width="20%" height="20%">
+            <!-- <img src="/images/RStudio.png"width="25%" height="25%"> -->
+        </div>
+    </div>
+    
+    <!--Handle scrolling and sliding-->
+    <script>
+        function isInViewport(element) {
+            const rect = element.getBoundingClientRect();
+            return (
+                rect.top >= -70 &&
+                rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.7
+            );
+        }
+        
+        function handleScroll() {
+            const containers = document.querySelectorAll('.sliding-container');
+            
+            containers.forEach(container => {
+                if (isInViewport(container) && !container.classList.contains('animated')) {
+                    const textContent = container.querySelector('.text-content');
+                    const imageContent = container.querySelector('.image-content');
+                    
+                    // Force a reflow before adding the class
+                    void container.offsetWidth;
+                    
+                    textContent.classList.add('slide-in');
+                    imageContent.classList.add('slide-in');
+                    
+                    // Mark this container as animated
+                    container.classList.add('animated');
+                }
+            });
+            
+            // Remove scroll listener if all containers are animated
+            if (document.querySelectorAll('.sliding-container:not(.animated)').length === 0) {
+                window.removeEventListener('scroll', handleScroll);
+            }
+        }
+        
+        // Add scroll listener
+        window.addEventListener('scroll', handleScroll);
+        
+        // Trigger initial check after a small delay
+        setTimeout(handleScroll, 100);
+    </script>
+
+    <footer class="footer">
+        <a href="https://www.linkedin.com/in/saurav-kumar-1432552b5/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+        </a>
+        <a href="https://github.com/RedHarmonii" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+        </a>
+        <a href="https://leetcode.com/u/sauravk_10/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.702-1.15-.702-1.863s.235-1.357.702-1.824l4.319-4.38c.467-.467 1.125-.645 1.837-.645s1.357.195 1.823.662l2.697 2.606c.514.515 1.365.497 1.9-.038.535-.536.553-1.387.039-1.901l-2.609-2.636a5.055 5.055 0 0 0-2.445-1.337l2.467-2.503c.516-.514.498-1.366-.037-1.901-.535-.535-1.387-.552-1.901-.038l-10.1 10.101c-.981.982-1.494 2.337-1.494 3.835 0 1.498.513 2.895 1.494 3.875l4.347 4.361c.981.981 2.312 1.494 3.81 1.494 1.497 0 2.853-.513 3.835-1.494l2.609-2.637c.514-.514.496-1.365-.039-1.9s-1.386-.553-1.899-.038z"/>
+                <path d="M20.811 13.01H10.666M19.299 9.183l-8.635 8.634M19.299 9.183l-8.635 8.634" />
+            </svg>
+        </a>
+    </footer>
+</body>
+</html>
+
+<!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@100;300;400&display=swap" rel="stylesheet"> -->
+<!-- 
+<i class="fa-solid fa-chart-simple"></i>
+<i class="fa-brands fa-linkedin-in"></i>
+<i class="fa-brands fa-square-git"></i>
+<i class="fa-brands fa-git"></i>
+<img src="/images/stock.png" width="100px">
+ -->

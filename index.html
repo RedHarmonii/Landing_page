@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="description" content="Landing page">
+    <meta name="keywords" content="HTML, CSS">
+    <meta name="author" content="Saurav Kumar">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saurav Kumar</title>
+    <link rel="stylesheet" href="cube.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@100;300;400&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/917be88e2a.js" crossorigin="anonymous"></script>
+   
+    <style>
+         @keyframes move{
+            100% {transform: translate3d(0,0,1px) rotate(360deg);}
+        }
+        .background{
+            position:fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            background: linear-gradient(#2c2c2cc2,#000000ec);
+            overflow: hidden;
+        }
+        .background span{
+            width: 3vmin;
+            height: 3vmin;
+            border-radius: 3vmin;
+            backface-visibility: hidden;
+            position: absolute;
+            animation: move linear infinite;
+            animation-duration: 43;
+        }
+        h1{
+            position:absolute;
+            top:0px;
+            left:1%;
+            color: black;
+            border-color:silver solid transparent;
+            border-style:groove;
+            border-radius: 10px;
+            padding: 5px;
+        }
+        p{
+            color: white;
+            margin: 37% auto;
+            text-align: center;
+            font-style: italic;
+        }
+        p:hover{
+            transition: transform 0.3s ease;
+            transform: translateY(-5px);
+            scale: 1.1;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="background" id="background"></div>
+    <h1>Welcome! Get to know me...</h1>
+
+    <!--PAGES-->
+    <div class="container">
+        <div class="cube">
+            <!--PROJECTS PAGE-->
+            <div class="face front">
+                <p>
+                    <a href="projects.html" target="_self" title="Machine Learning Programs">
+                        ML Projects
+                    </a>
+                </p>
+            </div>
+            <!--PROFILE PAGE-->
+            <div class="face left">
+                <p>
+                    <a href="profile.html" target="_self" title="Profile">
+                        Profile
+                    </a>
+                </p>
+            </div>
+            <!--RESUME PAGE-->
+            <div class="face right">
+                <p>
+                    <a href="My Resume.pdf" target="_blank" title="Resume">
+                        Curriculum Vitae
+                    </a>
+                </p>
+            </div>
+            <!--Works in Progress-->
+            <div class="face back">
+                <p>
+                    <a href="others.html" target="_self" title="Works in Progress">
+                        Pet Projects
+                    </a>
+                </p>
+            </div>
+            <div class="face top">
+            </div>
+            <div class="face bottom">
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <a href="https://www.linkedin.com/in/saurav-kumar-1432552b5/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+        </a>
+        <a href="https://github.com/RedHarmonii" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+        </a>
+        <a href="https://leetcode.com/u/sauravk_10/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.702-1.15-.702-1.863s.235-1.357.702-1.824l4.319-4.38c.467-.467 1.125-.645 1.837-.645s1.357.195 1.823.662l2.697 2.606c.514.515 1.365.497 1.9-.038.535-.536.553-1.387.039-1.901l-2.609-2.636a5.055 5.055 0 0 0-2.445-1.337l2.467-2.503c.516-.514.498-1.366-.037-1.901-.535-.535-1.387-.552-1.901-.038l-10.1 10.101c-.981.982-1.494 2.337-1.494 3.835 0 1.498.513 2.895 1.494 3.875l4.347 4.361c.981.981 2.312 1.494 3.81 1.494 1.497 0 2.853-.513 3.835-1.494l2.609-2.637c.514-.514.496-1.365-.039-1.9s-1.386-.553-1.899-.038z"/>
+                <path d="M20.811 13.01H10.666M19.299 9.183l-8.635 8.634M19.299 9.183l-8.635 8.634" />
+            </svg>
+        </a>
+    </footer>
+
+    <!--Build background with dots-->
+    <script>
+        function generateSpans(count,colors){
+            const background = document.getElementById('background');
+
+            //clear
+            background.innerHTML = '';
+
+            for(let i = 0; i < count; i++){
+                const span = document.createElement('span');
+                const top = Math.random() * 100;
+                const left = Math.random() * 100;
+
+                // Random animation duration between 10s and 50s
+                const animationDuration = Math.random() * 40 + 10;
+                
+                // Random animation delay between -70s and 0s
+                const animationDelay = Math.random() * -70;
+                
+                // Random transform origin
+                const transformOriginX = Math.random() * 20 - 10; // -10 to 10
+                const transformOriginY = Math.random() * 40 - 20; // -20 to 20
+                
+                // Random shadow size between 1 and 2
+                const shadowSize = 1 + Math.random();
+                
+                // Apply styles
+                span.style.color = colors[i % colors.length];
+                span.style.top = `${top}%`;
+                span.style.left = `${left}%`;
+                span.style.animationDuration = `${animationDuration}s`;
+                span.style.animationDelay = `${animationDelay}s`;
+                span.style.transformOrigin = `${transformOriginX}vw ${transformOriginY}vh`;
+                span.style.boxShadow = `-6vmin 0 ${shadowSize}vmin currentColor`;
+
+                background.appendChild(span);
+            }
+        }
+
+        const colors = ['#eeeded','#1f1f1f','##c2c1c1']
+        generateSpans(30, colors);
+    </script>
+
+    <!--Build CUBE-->
+    <script>
+        const cube = document.querySelector('.cube');
+        let drag = false;
+        let curX = -15;
+        let curY = 15;
+        let x,y;
+
+        // Update CSS variables for the hover animation
+        function updateRotationVariables() {
+            cube.style.setProperty('--rotX', `${curX}deg`);
+            cube.style.setProperty('--rotY', `${curY}deg`);
+        }
+        updateRotationVariables();
+
+        cube.addEventListener('mousedown', (e) => {
+            drag = true;
+            x = e.clientX;
+            y = e.clientY;
+            cube.style.transition = 'none';
+        });
+        document.addEventListener('mousemove', (e) => {
+            if(!drag) return;
+
+            const moveX = e.clientX - x;
+            const moveY = e.clientY - y;
+
+            curY += moveX * 0.5;
+            curX -= moveY * 0.5;
+            
+            cube.style.transform = `rotateX(${curX}deg) rotateY(${curY}deg)`;
+
+            updateRotationVariables();
+            x = e.clientX;
+            y = e.clientY;
+        });
+
+        document.addEventListener('mouseup', () => {
+            drag = false;
+            cube.style.transition = 'transform 0.5s ease';
+        });
+
+    </script>
+
+</body>
+</html>

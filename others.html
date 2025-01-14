@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Projects</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@100;300;400&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/917be88e2a.js" crossorigin="anonymous"></script>
+    <title>Pet Projects</title>
+    
+    <style>
+        .background-container{
+            position:fixed;
+            top:0;
+            left:0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+            background: linear-gradient(#3d3d3dd3,#000000e5);
+        }
+        .star_8{
+            position: absolute;
+            height:25px; width: 25px;
+            transform-origin: center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .star_8:before,.star_8:after{
+            content:"";
+            position: absolute;
+            height:100%; width: 100%;
+            background: linear-gradient(45deg, #000000d7, #818181);
+            transform-origin: center;
+        }
+        .star_8:before {transform: rotate(0deg);}
+        .star_8:after {transform: rotate(45deg);}
+
+        .star_8 {
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))
+                drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))
+                blur(0.2px);
+            opacity: 0.8;
+        }
+        @keyframes spin {
+            from {transform: rotate(0deg);}
+            to {transform: rotate(360deg);}
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-container" id="starBackground"></div>
+
+    <script>
+        class Star {
+            constructor(container) {
+                this.element = document.createElement('div');
+                this.element.className = 'star_8';
+                
+                const size = Math.random() * 20 + 15;
+                this.element.style.width = `${size}px`;
+                this.element.style.height = `${size}px`;
+                
+                this.x = Math.random() * window.innerWidth;
+                this.y = Math.random() * window.innerHeight;
+                this.speedX = (Math.random() - 0.5) * 100;
+                this.speedY = (Math.random() - 0.5) * 100;
+                
+                // Mouse interaction properties
+                this.repulsionRange = Math.random() * 100 + 200;
+                this.repulsionStrength = Math.random() * 200 + 400;
+                
+                const spinDuration = Math.random() * 4 + 2;
+                this.element.style.animation = `spin ${spinDuration}s linear infinite`;
+                
+                container.appendChild(this.element);
+                this.updatePosition();
+            }
+            
+            updatePosition() {
+                this.element.style.left = `${this.x}px`;
+                this.element.style.top = `${this.y}px`;
+            }
+            
+            move(deltaTime, mouseX, mouseY) {
+                const dx = this.x - mouseX;
+                const dy = this.y - mouseY;
+                const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
+                
+                // Apply mouse repulsion if within range
+                if (distanceToMouse < this.repulsionRange) {
+                    const repulsionFactor = (1 - distanceToMouse / this.repulsionRange) * this.repulsionStrength;
+                    
+                    
+                    const dirX = dx / distanceToMouse;
+                    const dirY = dy / distanceToMouse;
+                    
+                    // Apply repulsion force
+                    this.speedX += dirX * repulsionFactor * deltaTime;
+                    this.speedY += dirY * repulsionFactor * deltaTime;
+                }
+                
+                // Apply drag to prevent excessive speeds
+                const drag = 0.95;
+                this.speedX *= drag;
+                this.speedY *= drag;
+                
+                this.x += this.speedX * deltaTime;
+                this.y += this.speedY * deltaTime;
+                
+                // Bounce off edges
+                if (this.x <= 0 || this.x >= window.innerWidth - this.element.offsetWidth) {
+                    this.speedX *= -0.8; 
+                    this.x = Math.max(0, Math.min(this.x, window.innerWidth - this.element.offsetWidth));
+                }
+                
+                if (this.y <= 0 || this.y >= window.innerHeight - this.element.offsetHeight) {
+                    this.speedY *= -0.8; 
+                    this.y = Math.max(0, Math.min(this.y, window.innerHeight - this.element.offsetHeight));
+                }
+                
+                this.updatePosition();
+            }
+        }
+        
+        class StarField {
+            constructor(containerId, starCount) {
+                this.container = document.getElementById(containerId);
+                this.stars = [];
+                this.lastTime = performance.now();
+                this.mouseX = window.innerWidth / 2;
+                this.mouseY = window.innerHeight / 2;
+                
+                for (let i = 0; i < starCount; i++) {
+                    this.stars.push(new Star(this.container));
+                }
+                
+                // Track mouse position
+                document.addEventListener('mousemove', (e) => {
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                });
+                
+                this.animate = this.animate.bind(this);
+                requestAnimationFrame(this.animate);
+                
+                window.addEventListener('resize', () => {
+                    this.handleResize();
+                });
+            }
+            
+            animate(currentTime) {
+                const deltaTime = (currentTime - this.lastTime) / 1000;
+                this.lastTime = currentTime;
+                
+                // Update each star with mouse position
+                this.stars.forEach(star => star.move(deltaTime, this.mouseX, this.mouseY));
+                
+                requestAnimationFrame(this.animate);
+            }
+            
+            handleResize() {
+                this.stars.forEach(star => {
+                    star.x = Math.min(star.x, window.innerWidth - star.element.offsetWidth);
+                    star.y = Math.min(star.y, window.innerHeight - star.element.offsetHeight);
+                    star.updatePosition();
+                });
+            }
+        }
+        
+        const starField = new StarField('starBackground', 25);
+    </script>
+
+
+
+    <footer class="footer">
+        <a href="https://www.linkedin.com/in/saurav-kumar-1432552b5/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+        </a>
+        <a href="https://github.com/RedHarmonii" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+        </a>
+        <a href="https://leetcode.com/u/sauravk_10/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.702-1.15-.702-1.863s.235-1.357.702-1.824l4.319-4.38c.467-.467 1.125-.645 1.837-.645s1.357.195 1.823.662l2.697 2.606c.514.515 1.365.497 1.9-.038.535-.536.553-1.387.039-1.901l-2.609-2.636a5.055 5.055 0 0 0-2.445-1.337l2.467-2.503c.516-.514.498-1.366-.037-1.901-.535-.535-1.387-.552-1.901-.038l-10.1 10.101c-.981.982-1.494 2.337-1.494 3.835 0 1.498.513 2.895 1.494 3.875l4.347 4.361c.981.981 2.312 1.494 3.81 1.494 1.497 0 2.853-.513 3.835-1.494l2.609-2.637c.514-.514.496-1.365-.039-1.9s-1.386-.553-1.899-.038z"/>
+                <path d="M20.811 13.01H10.666M19.299 9.183l-8.635 8.634M19.299 9.183l-8.635 8.634" />
+            </svg>
+        </a>
+    </footer>
+
+</body>
+</html>

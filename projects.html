@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects</title>
+    <link rel="stylesheet" href="dropdown.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@100;300;400&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/917be88e2a.js" crossorigin="anonymous"></script>
+    
+    <style>
+        .background-container{
+            position:fixed;
+            top:0;
+            left:0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -1;
+            background: linear-gradient(#000000ec,#3d3d3d);
+        }
+        .moving-rectangle{
+            position: absolute;
+            width: 100px;
+            height: 30px;
+            background-color: rgb(255, 255, 255);
+            transform: rotate(135deg);
+            pointer-events: none;
+        }
+        @keyframes moveTopRight{
+            0%{transform:translate(-100%,100%) rotate(135deg); opacity: 0;}
+            10%{opacity: 0.3;}
+            90%{opacity: 0.3;}
+            100% {transform:translate(100%,-100%) rotate(135deg); opacity: 0;}
+        }
+        @keyframes moveBottomLeft{
+            0%{transform:translate(100%,-100%) rotate(135deg); opacity: 0;}
+            10%{opacity: 0.3;}
+            90%{opacity: 0.3;}
+            100% {transform:translate(-100%,100%) rotate(135deg); opacity: 0;}
+        }
+        h1{
+            font-family: "Tomorrow", Arial, Helvetica, sans-serif;
+            font-size: 30px;
+            text-align: center;
+            color: rgb(219, 219, 219);
+            padding: 10px;
+            border: 1px solid white !important;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-container" id="rectangles"></div>
+
+    <h1>Machine Learning Projects</h1>
+
+    <div class="dropdown-container">
+        <div class="dropdown-header" onclick="toggleDropdown(this)">
+            <span>K-Nearest Neighbors (Scratch)</span>
+            <span class="arrow">&DoubleLeftArrow;</span>
+        </div>
+        <div class="dropdown-content">
+            <div class="code-block">
+                import pandas as pd 
+                import numpy as np 
+                from scipy.stats import mode
+                from sklearn.preprocessing import StandardScaler
+                from sklearn.model_selection import train_test_split
+                from sklearn.metrics import accuracy_score 
+
+                class KNN():
+                    #default constructor
+                    def __init__(self, K, distance = 'euclidean',weight = 'uniform'):
+                        self.K = K
+                        self.distance = distance
+                        self.weight = weight
+                    
+                    #preprocess dataset for missing values and randomize samples if necessary
+                    def preprocess(self, dataset):
+                        df = pd.DataFrame(dataset)
+                        df = df.fillna('null')
+                        
+                        for col in df.columns:
+                            for index in range(len(df)):
+                                if df.at[index, col] == 'null':
+                                    neighbors = []
+                                    
+                                    if index < 11:
+                                        # Case: Current row is less than 11, take rows below
+                                        neighbors = df[col][index+1:index+11].replace('null', np.nan).dropna().values
+                                    else:
+                                        # Case: Current row is 11 or more, take rows above
+                                        neighbors = df[col][index-11:index].replace('null', np.nan).dropna().values
+                                    
+                                    
+                                    if df[col].dtype in [np.int64, np.float64]:
+                                        # Numerical column: Fill with average of neighbors
+                                        if neighbors:
+                                            df.at[index, col] = np.mean(neighbors)
+                                    else:
+                                        # Categorical column: Fill with mode of neighbors
+                                        if neighbors:
+                                            df.at[index, col] = mode(neighbors)[0][0]
+                        
+                        # Shuffle the rows of the dataset before returning
+                        df = df.sample(frac=1).reset_index(drop=True)
+                        
+                        return df
+                        
+                    # Train dataset
+                    def fit(self, train_features, train_labels):
+                        # Normalize features for accuracy
+                        self.scaler = StandardScaler()
+                        self.train_features = self.scaler.fit_transform(train_features)
+                        self.train_labels = train_labels
+                        
+                        #self.samples : the number of samples in the training set
+                        #self.features : the number of features in the training set
+                        self.samples, self.features = self.train_features.shape
+                    
+                    # Test dataset
+                    def predict(self, test_features):
+                        self.test_features = self.scaler.transform(test_features)
+                        self.test_samples, self.features = self.test_features.shape
+                        
+                        
+                        # Given a point, compute distane between all neighbors
+                        predictions = np.zeros(self.test_samples)
+                        
+                        for i in range(self.test_samples):
+                            
+                            sample = self.test_features[i]
+                            
+                            neighbors_features, neighbors_labels = self.search(sample)
+                            
+                            if self.weight == 'uniform':
+                                unique_labels, counts = np.unique(neighbors_labels, return_counts=True)
+                                predictions[i] = unique_labels[np.argmax(counts)]
+                            elif self.weight == 'distance':
+                                predictions[i] = self.weighted_vote(sample, neighbors_features, neighbors_labels)
+                        
+                        return predictions
+
+                    # Find neighbors
+                    def search(self, sample):
+                        distances = np.zeros(self.samples)
+                        
+                        for i in range(self.samples):
+                            distances[i] = self.find_distance(sample, self.train_features[i])
+                            
+                        index = distances.argsort()[:self.K]
+                        # Return both the K nearest neighbors and their labels
+                        neighbors_features = self.train_features[index]
+                        neighbors_labels = self.train_labels[index]
+                        
+                        return neighbors_features, neighbors_labels
+                    
+                    # compute distances
+                    def find_distance(self, sample ,train_features):
+                        if self.distance == 'euclidean':
+                            return np.sqrt(np.sum(np.square(sample - train_features)))
+                        elif self.distance == 'manhattan':
+                            return np.sum(np.abs(sample - train_features))
+                    
+                    # If a point is closer than other neighbors, the point has more value
+                    def weighted_vote(self, sample, neighbors_features, neighbors_labels):
+                        
+                        distances = np.array([self.find_distance(sample, neighbor_feature) for neighbor_feature in neighbors_features])
+                        
+                        # Dictionary to store the sum of weights for each class/label
+                        weights = 1 / (distances + 1e-5)
+                        weighted_labels = {}
+                        
+                        for i, label in enumerate(neighbors_labels):
+                            if label not in weighted_labels:
+                                weighted_labels[label] = 0
+                            # Add the weight of the neighbor to its corresponding label
+                            weighted_labels[label] += weights[i]
+                        
+                        # Return the label with the highest total weight
+                        return max(weighted_labels, key=weighted_labels.get)
+
+
+                #FIND DATASET: https://archive.ics.uci.edu/dataset/109/wine
+
+                # Load the dataset into a DataFrame
+                dataset = pd.read_csv('wines.txt', header=None)
+
+                # Initialize and preprocess the dataset
+                knn = KNN(K=3)
+                processed_dataset = knn.preprocess(dataset)
+
+                # Separate features and labels
+                X = processed_dataset.iloc[:,1:].values
+                Y = processed_dataset.iloc[:,0].values
+
+                # Split into training and test sets
+                X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
+
+                # Evaluate KNN algorithm for multiple values of K
+                print("\nKNN algorithm using all features:\n")
+                for K in range(1, 11):
+                    knn = KNN(K=K,weight='distance')
+                    knn.fit(X_train, Y_train)
+                    predictions = knn.predict(X_test)
+                    accuracy = accuracy_score(Y_test, predictions)
+                    print(f'Accuracy of the KNN model with K={K}: {accuracy * 100:.2f}%')
+            </div>
+        </div>
+    </div>
+
+    <div class="dropdown-container">
+        <div class="dropdown-header" onclick="toggleDropdown(this)">
+
+            <span>Neural Network (Tensorflow)</span>
+            <span class="arrow" >&DoubleLeftArrow;</span>
+        </div>
+        <div class="dropdown-content">
+            <div class="code-block">
+                from sklearn.metrics import classification_report
+                from sklearn.preprocessing import StandardScaler,LabelEncoder,OneHotEncoder
+                from sklearn.model_selection import train_test_split
+                import matplotlib.pyplot as plt
+                import keras
+                from keras import regularizers
+                import pandas as pd
+                import tensorflow as tf
+
+                # FIND DATASET : https://archive.ics.uci.edu/dataset/186/wine+quality
+
+                # Extract data from the txt file and split data into features and labels
+                # To pre-process, Standardize features and Encode labels since the features
+                # are discrete and continuous values ranging from 0 to 2000
+                # open the txt with the dataset
+                data = pd.read_excel("winequality-white.xlsx",header = 0)
+
+                features = data.iloc[:, 0:-1]
+                labels = data.iloc[:,-1]
+
+                #convert labels from discrete to ordinal for a better classification results
+                labels = pd.Series(["bad" if elm <= 4 else "okay" if 4 < elm <= 8 else "great" for elm in labels])
+
+                scaler = StandardScaler()
+                features = scaler.fit_transform(features)
+
+                encoder = LabelEncoder()
+                labels = encoder.fit_transform(labels)
+                labelsOnehot = keras.utils.to_categorical(labels,num_classes=3)
+
+                # Split the model into 70/30 and randomize the data since it's organized by labels
+                trainFeatures, testFeatures, trainLabels, testLabels =\
+                    train_test_split(features, labelsOnehot, train_size=0.7, random_state=42)
+
+                # Build the neural network. The input layer will have 13 nodes since there as 13 features
+                # Use two hidden layers and dropout layers with relu activation function. included regularizes
+                # to mitigate overfitting since neural networks are prone to it.
+                neural_network = keras.Sequential([
+                    # Input layer
+                    keras.layers.InputLayer(input_shape=(features.shape[1],)),
+                    # Hidden layers
+                    keras.layers.Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+                    keras.layers.Dropout(0.2),
+                    keras.layers.Dense(32, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+                    keras.layers.Dropout(0.2),
+                    # Output Layer
+                    keras.layers.Dense(3, activation='softmax')
+                ])
+                # Chose the adam optimizer with categorical loss and used to accuracy for metrics
+                neural_network.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
+
+                # Final hyperparameters: 100 epochs and 1/3 validation split, otherwise default values
+                constraints = neural_network.fit(trainFeatures,trainLabels,epochs=100,batch_size=32,validation_split=0.2,verbose=1)
+
+                loss, modelAccuracy = neural_network.evaluate(testFeatures,testLabels)
+
+                print(f"\nTest accuracy : {modelAccuracy:4f}")
+
+                # Make predictions on the test set and then convert back into class labels.
+                # Afterward, convert those labels from one hot to original class labels
+                predictions = neural_network.predict(testFeatures)
+                predictedLabels = predictions.argmax(axis=1)
+                trueLabels = testLabels.argmax(axis=1)
+
+                report = classification_report(trueLabels, predictedLabels, labels=[0, 1, 2], target_names=encoder.classes_)
+                print(report)
+
+                # Plot training & validation accuracy and loss
+                plt.figure(figsize=(12, 4))
+
+                plt.subplot(1, 2, 1)
+                plt.plot(constraints.history['accuracy'])
+                plt.plot(constraints.history['val_accuracy'])
+                plt.title('Model accuracy')
+                plt.ylabel('Accuracy')
+                plt.xlabel('Epoch')
+                plt.legend(['Train', 'Validation'])
+
+                plt.subplot(1, 2, 2)
+                plt.plot(constraints.history['loss'])
+                plt.plot(constraints.history['val_loss'])
+                plt.title('Model loss')
+                plt.ylabel('Loss')
+                plt.xlabel('Epoch')
+                plt.legend(['Train', 'Validation'])
+
+                plt.tight_layout()
+                plt.show()
+            </div>  
+        </div>
+    </div>
+
+
+    <div class="dropdown-container">
+        <div class="dropdown-header" onclick="toggleDropdown(this)">
+
+            <span>Logistic Regression</span>
+            <span class="arrow">&DoubleLeftArrow;</span>
+        </div>
+        <div class="dropdown-content">
+            <div class="code-block">
+                import pandas as pd
+                from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+                from sklearn.linear_model import LogisticRegression
+                from sklearn.model_selection import train_test_split
+                from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+                import seaborn as sns
+                import matplotlib.pyplot as plt
+
+                # FIND DATASET : https://archive.ics.uci.edu/dataset/186/wine+quality
+
+                # convert dataset to dataframe and separate the features and labels
+                data = pd.read_excel("winequality-white.xlsx",header = 0)
+
+                features = data.iloc[:, 0:-1]
+                target = data.iloc[:,-1] 
+                target_binary = (target > 6).astype(int)
+
+                training_features, test_features, training_labels, test_labels =\
+                train_test_split(features, target_binary, test_size=0.3, random_state=42)
+
+                # Scale features
+                scaler = StandardScaler()
+                training_features = scaler.fit_transform(training_features)
+                test_features = scaler.transform(test_features)
+
+                # Add polynomial features. By expanding the feature space, 
+                # polynomial features allow the model to fit more complex patterns in the data
+                poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
+                training_features_poly = poly.fit_transform(training_features)
+                test_features_poly = poly.transform(test_features)
+
+
+                # Logistic Regression with regularization
+                logistic_model = LogisticRegression(solver='newton-cg', C=1,random_state=42)
+                logistic_model.fit(training_features_poly, training_labels)
+
+
+                label_predictions = logistic_model.predict(test_features_poly)
+                accuracy = accuracy_score(test_labels, label_predictions)
+                print("Target therehold 7 :")
+                print("Accuracy: {:.2f}%".format(accuracy * 100))
+
+                #Visualization
+                print(classification_report(test_labels, label_predictions))
+                conf_matrix = confusion_matrix(test_labels, label_predictions)
+                sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
+                plt.xlabel("Predicted")
+                plt.ylabel("Actual")
+                plt.title("Confusion Matrix")
+                plt.show()
+
+            </div>
+                
+        </div>
+    </div>
+
+
+    <div class="dropdown-container">
+        <div class="dropdown-header" onclick="toggleDropdown(this)">
+
+            <span>Random Forest</span>
+            <span class="arrow">&DoubleLeftArrow;</span>
+        </div>
+        <div class="dropdown-content">
+            <div class="code-block">
+                import pandas as pd
+                import numpy as np
+                from sklearn.metrics import accuracy_score, classification_report
+                from sklearn.model_selection import train_test_split, learning_curve
+                from sklearn.preprocessing import StandardScaler
+                from sklearn.ensemble import RandomForestClassifier
+                import matplotlib.pyplot as plt
+
+                # FIND DATASET : https://archive.ics.uci.edu/dataset/186/wine+quality
+
+                # open the txt with the dataset
+                data = pd.read_excel("winequality-white.xlsx",header = 0)
+
+                features = data.iloc[:, 0:-1]
+                target = data.iloc[:,-1]
+
+                #convert labels from discrete to ordinal for a better classification results
+                target = pd.Series(["bad" if elm <= 4 else "okay" if 4 < elm < 8 else "great" for elm in target])
+
+                #Split and standardize the dataset prior to fitting
+                training_features, test_features, training_labels, test_labels = train_test_split(features, target, test_size=0.3, random_state=42)
+
+                scaler = StandardScaler()
+                training_features = scaler.fit_transform(training_features)
+                test_features = scaler.transform(test_features)
+
+                random_forest = RandomForestClassifier(n_estimators=150,max_depth=25,min_samples_split=2,random_state=42)
+                random_forest.fit(training_features, training_labels)
+
+
+                label_predictions = random_forest.predict(test_features)
+                accuracy = accuracy_score(test_labels, label_predictions)
+                print("Accuracy: {:.2f}%".format(accuracy * 100))
+
+                # Classification Report
+                report = classification_report(test_labels, label_predictions, target_names=["bad", "okay", "great"])
+                print("\nClassification Report:\n")
+                print(report)
+
+                # Generate learning curve data and calculate mean and standard deviation for training/test scores
+                train_sizes, train_scores, test_scores = learning_curve(
+                    random_forest, training_features, training_labels, cv=5, scoring='accuracy', n_jobs=-1)
+
+
+                train_mean = np.mean(train_scores, axis=1)
+                train_std = np.std(train_scores, axis=1)
+                test_mean = np.mean(test_scores, axis=1)
+                test_std = np.std(test_scores, axis=1)
+
+                # Plot learning curve
+                plt.figure(figsize=(10, 6))
+                plt.plot(train_sizes, train_mean, label="Training Score", color="blue")
+                plt.plot(train_sizes, test_mean, label="Cross-Validation Score", color="orange")
+                plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, color="blue", alpha=0.2)
+                plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, color="orange", alpha=0.2)
+                plt.title("Learning Curve")
+                plt.xlabel("Training Set Size")
+                plt.ylabel("Accuracy Score")
+                plt.legend(loc="best")
+                plt.grid()
+                plt.show()
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            
+            content.classList.toggle('active');
+            arrow.classList.toggle('active');
+        }
+    </script>
+
+    <!--Build background with boxes-->
+    <script>
+        function buildRectangles(rectangles){
+            const container = document.getElementById('rectangles');
+            
+            for(let i = 0; i < rectangles; i++){
+                const rectangle = document.createElement('div');
+                rectangle.classList.add('moving-rectangle');
+                
+                //starting positon
+                const startX = Math.random() * window.innerWidth;
+                const startY = Math.random() * window.innerHeight;
+                rectangle.style.left = `${startX}px`;
+                rectangle.style.top = `${startY}px`;
+                
+                //size anbd shade
+                const width = 50 + Math.random() * 100;
+                const height = 20 + Math.random() * 30;
+                rectangle.style.width = `${width}px`;
+                rectangle.style.height = `${height}px`;
+
+                rectangle.style.opacity = 0.1 + Math.random() * 0.2;
+
+                // direction and animation
+                const isMovingTopRight = Math.random() > 0.5;
+                const animationDuration = 15 + Math.random() * 20;
+                
+                rectangle.style.animation = `${isMovingTopRight ? 'moveTopRight' : 'moveBottomLeft'} ${animationDuration}s linear infinite`;
+                container.appendChild(rectangle);
+            }
+        }
+
+        buildRectangles(25);
+
+        // Recreate rectangles when window is resized
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('backgroundContainer');
+            container.innerHTML = '';
+            buildRectangles(25);
+        });
+
+    </script>
+
+    <footer class="footer">
+        <a href="https://www.linkedin.com/in/saurav-kumar-1432552b5/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+        </a>
+        <a href="https://github.com/RedHarmonii" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+        </a>
+        <a href="https://leetcode.com/u/sauravk_10/" class="social-icon" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.702-1.15-.702-1.863s.235-1.357.702-1.824l4.319-4.38c.467-.467 1.125-.645 1.837-.645s1.357.195 1.823.662l2.697 2.606c.514.515 1.365.497 1.9-.038.535-.536.553-1.387.039-1.901l-2.609-2.636a5.055 5.055 0 0 0-2.445-1.337l2.467-2.503c.516-.514.498-1.366-.037-1.901-.535-.535-1.387-.552-1.901-.038l-10.1 10.101c-.981.982-1.494 2.337-1.494 3.835 0 1.498.513 2.895 1.494 3.875l4.347 4.361c.981.981 2.312 1.494 3.81 1.494 1.497 0 2.853-.513 3.835-1.494l2.609-2.637c.514-.514.496-1.365-.039-1.9s-1.386-.553-1.899-.038z"/>
+                <path d="M20.811 13.01H10.666M19.299 9.183l-8.635 8.634M19.299 9.183l-8.635 8.634" />
+            </svg>
+        </a>
+    </footer>
+
+</body>
+</html>
