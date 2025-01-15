@@ -20,7 +20,14 @@
             -ms-user-select: none;
             user-select: none;
         }
-         @keyframes move{
+        a {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+            pointer-events: auto;
+        }
+        @keyframes move{
             100% {transform: translate3d(0,0,1px) rotate(360deg);}
         }
         .background{
@@ -182,71 +189,63 @@
         let drag = false;
         let curX = -15;
         let curY = 15;
-        let x,y;
-
-        // Update CSS variables for the hover animation
+        let x, y;
+        
         function updateRotationVariables() {
             cube.style.setProperty('--rotX', `${curX}deg`);
             cube.style.setProperty('--rotY', `${curY}deg`);
         }
         updateRotationVariables();
-
-        // Mouse events
-        cube.addEventListener('mousedown', handleDragStart);
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-
-        // Touch events
-        cube.addEventListener('touchstart', handleTouchStart);
-        document.addEventListener('touchmove', handleTouchMove);
-        document.addEventListener('touchend', handleDragEnd);
-
+        
         function handleDragStart(e) {
+            // Check if the clicked element is a link or within a link
+            if (e.target.closest('a')) return;
+            
             drag = true;
             x = e.clientX;
             y = e.clientY;
             cube.style.transition = 'none';
         }
-
+        
         function handleTouchStart(e) {
+            // Check if the touched element is a link or within a link
+            if (e.target.closest('a')) return;
+            
             drag = true;
             x = e.touches[0].clientX;
             y = e.touches[0].clientY;
             cube.style.transition = 'none';
-            // Prevent scrolling while dragging
             e.preventDefault();
         }
-
+        
         function handleDragMove(e) {
             if (!drag) return;
-
+        
             const moveX = e.clientX - x;
             const moveY = e.clientY - y;
-
+        
             updateCubeRotation(moveX, moveY);
             x = e.clientX;
             y = e.clientY;
         }
-
+        
         function handleTouchMove(e) {
             if (!drag) return;
-
+        
             const moveX = e.touches[0].clientX - x;
             const moveY = e.touches[0].clientY - y;
-
+        
             updateCubeRotation(moveX, moveY);
             x = e.touches[0].clientX;
             y = e.touches[0].clientY;
-            
-            // Prevent scrolling while dragging
             e.preventDefault();
         }
-
+        
         function handleDragEnd() {
             drag = false;
             cube.style.transition = 'transform 0.5s ease';
         }
-
+        
         function updateCubeRotation(moveX, moveY) {
             curY += moveX * 0.5;
             curX -= moveY * 0.5;
@@ -254,6 +253,16 @@
             cube.style.transform = `rotateX(${curX}deg) rotateY(${curY}deg)`;
             updateRotationVariables();
         }
+        
+        // Mouse events
+        cube.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+        
+        // Touch events
+        cube.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchmove', handleTouchMove);
+        document.addEventListener('touchend', handleDragEnd);
     </script>
 
 </body>
