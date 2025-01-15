@@ -14,6 +14,12 @@
     <script src="https://kit.fontawesome.com/917be88e2a.js" crossorigin="anonymous"></script>
    
     <style>
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
          @keyframes move{
             100% {transform: translate3d(0,0,1px) rotate(360deg);}
         }
@@ -185,33 +191,69 @@
         }
         updateRotationVariables();
 
-        cube.addEventListener('mousedown', (e) => {
+        // Mouse events
+        cube.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+
+        // Touch events
+        cube.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchmove', handleTouchMove);
+        document.addEventListener('touchend', handleDragEnd);
+
+        function handleDragStart(e) {
             drag = true;
             x = e.clientX;
             y = e.clientY;
             cube.style.transition = 'none';
-        });
-        document.addEventListener('mousemove', (e) => {
-            if(!drag) return;
+        }
+
+        function handleTouchStart(e) {
+            drag = true;
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+            cube.style.transition = 'none';
+            // Prevent scrolling while dragging
+            e.preventDefault();
+        }
+
+        function handleDragMove(e) {
+            if (!drag) return;
 
             const moveX = e.clientX - x;
             const moveY = e.clientY - y;
 
+            updateCubeRotation(moveX, moveY);
+            x = e.clientX;
+            y = e.clientY;
+        }
+
+        function handleTouchMove(e) {
+            if (!drag) return;
+
+            const moveX = e.touches[0].clientX - x;
+            const moveY = e.touches[0].clientY - y;
+
+            updateCubeRotation(moveX, moveY);
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+            
+            // Prevent scrolling while dragging
+            e.preventDefault();
+        }
+
+        function handleDragEnd() {
+            drag = false;
+            cube.style.transition = 'transform 0.5s ease';
+        }
+
+        function updateCubeRotation(moveX, moveY) {
             curY += moveX * 0.5;
             curX -= moveY * 0.5;
             
             cube.style.transform = `rotateX(${curX}deg) rotateY(${curY}deg)`;
-
             updateRotationVariables();
-            x = e.clientX;
-            y = e.clientY;
-        });
-
-        document.addEventListener('mouseup', () => {
-            drag = false;
-            cube.style.transition = 'transform 0.5s ease';
-        });
-
+        }
     </script>
 
 </body>
