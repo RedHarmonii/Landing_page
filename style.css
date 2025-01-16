@@ -63,6 +63,23 @@ p:hover{
 a:link,a:visited{
     color: silver!important;
 }
+.back-icon {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    color: rgb(255, 255, 255);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.back-icon:hover {
+    transform: translateX(-5px);
+    color: #808080;
+}
 .footer {
     position: fixed;
     bottom: 0;
