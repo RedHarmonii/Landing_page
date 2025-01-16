@@ -73,6 +73,11 @@
         </div>
         <div class="dropdown-content">
             <div class="code-block">
+                # The following code builds a K-nearest neighbor algorithm which given a sample of wine,
+                # classifies the wine into one of three types based on its attributes. The algorithm first
+                # pre-processes the data for any empty values. Then the algorithm trains on 70%
+                # of the data and uses the other 30% to test for validity/accuracy.
+                
                 import pandas as pd 
                 import numpy as np 
                 from scipy.stats import mode
@@ -229,6 +234,12 @@
         </div>
         <div class="dropdown-content">
             <div class="code-block">
+                # The following code builds a Nueral Network with goal to determine a wine sample's
+                # quality based on features such as pH level, density, acidity, sulfur dioxide, and
+                # many other features. The output results in 'Bad', 'Good', or 'Great' wine.
+                # The network as 2 hidden layers with one input and output layer. A report
+                # is also printed on classification resutls.
+                
                 from sklearn.metrics import classification_report
                 from sklearn.preprocessing import StandardScaler,LabelEncoder,OneHotEncoder
                 from sklearn.model_selection import train_test_split
@@ -330,6 +341,11 @@
         </div>
         <div class="dropdown-content">
             <div class="code-block">
+                # This model uses logistic regression to determine if a wine has a quality
+                # of 60% or higher based on attributes such as pH level, density, acidity, sulfur dioxide, and
+                # many other features. The algorithm first changes the numerical labels into binary, scale and
+                # regulate the features, then finally visualize the accuracy of the model.
+                
                 import pandas as pd
                 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
                 from sklearn.linear_model import LogisticRegression
@@ -395,6 +411,12 @@
         </div>
         <div class="dropdown-content">
             <div class="code-block">
+                # The following code builds a Random Forest Model with goal to determine a wine sample's
+                # quality based on features such as pH level, density, acidity, sulfur dioxide, and
+                # many other features. The output results in 'Bad', 'Good', or 'Great' wine.
+                # The network as 2 hidden layers with one input and output layer. A report
+                # is also printed on classification resutls.
+                
                 import pandas as pd
                 import numpy as np
                 from sklearn.metrics import accuracy_score, classification_report
