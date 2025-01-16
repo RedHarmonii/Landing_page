@@ -38,7 +38,6 @@
             0%,100%{transform: scale(1); opacity: 0.8;}
             50%{transform: scale(1.5);opacity: 0.4;}
         }
-
         h1{
             text-align: center;
             font-size:50px;
@@ -86,12 +85,12 @@
             opacity: 1;
             transform: translateX(0);
         }
-        .sliding-container:nth-child(even) {
+        .sliding-container:nth-child(odd) {
             flex-direction: row-reverse;
         }
         @media (max-width: 768px) {
             .sliding-container, 
-            .sliding-container:nth-child(even) {
+            .sliding-container:nth-child(odd) {
                 flex-direction: column;
                 gap: 30px;
             }
@@ -102,6 +101,23 @@
                 justify-content: center;
                 flex-wrap: wrap;
             }
+        }
+        .back-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            color: rgb(255, 255, 255);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .back-icon:hover {
+            transform: translateX(-5px);
+            color: #808080;
         }
     </style>
 </head>
@@ -212,6 +228,13 @@
         });
     </script>
     
+    <a href="index.html" class="back-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"/>
+            <path d="M12 19l-7-7 7-7"/>
+        </svg>
+    </a>
+    
     <h1> Hi, My Name is Saurav Kumar</h1>
     <h2>I'm a UNLV graduate with a double Bachelor in Math and Computer Science. I'm Interested in Data Analytics and Data Science fields.</h2>
     <h2>I've worked as a Data Structures Tutor breaking down complex problems while explaining solutions to undergraduates.</h2>
@@ -219,8 +242,7 @@
 
 
     <div class="sliding-container">
-        <div class="text-content">
-            
+        <div class="text-content">    
             <h2>Background</h2>
             <p>
                 After High School, I joined United States Marine Corps as an Infantry Assualtman. Once I had
@@ -241,7 +263,6 @@
             <img src="images/USMC.svg" width="30%">
             <img src="images/pic1.jpg" width="25%">
             <img src="images/pic2.jpg" width="40%">
-            
         </div>
     </div>
 
@@ -303,10 +324,10 @@
         </div>
 
         <div class="image-content">
-            <img src="images/cpp.png" width="25%"height="25%">
-            <img src="images/python.png" width="25%"height="25%">
-            <img src="images/sql.png" width="20%" height="20%">
-            <img src="images/RStudio.png" width="25%" height="25%">
+            <img src="images/cpp.png"width="25%"height="25%">
+            <img src="images/python.png"width="25%"height="25%">
+            <img src="images/sql.png"width="20%" height="20%">
+            <img src="images/RStudio.png"width="25%" height="25%">
         </div>
     </div>
     
