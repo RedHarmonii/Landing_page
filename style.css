@@ -1,30 +1,3 @@
-/* @keyframes slideInLeft{
-    from{transform: translateX(-100%);}
-    to{transform: translateX(0);}
-}
-@keyframes slideInRight{
-    from{transform: translateX(100%);}
-    to{transform: translateX(0);}
-}
-@keyframes slideOutLeft{
-    from{transform: translateX(0);}
-    to{transform: translateX(-100%);}
-}
-@keyframes slideOutRight{
-    from{transform: translateX(0);}
-    to{transform: translateX(100%);}
-} */
-
-/* .info_odd{
-    animation: slideInLeft 3s ease-out 1s infinite;
-}
-.info_even {
-    margin-left: auto;
-    animation : slideInRight 2.5s ease-out 1s infinite;
-}
-.info_even{
-    animation: slideOutRight 3s ease-out 1s infinite;
-} */
 
 *{
     scrollbar-width: thin;
@@ -65,8 +38,8 @@ a:link,a:visited{
 }
 .back-icon {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 30px;
+    left: 30px;
     z-index: 1000;
     color: rgb(255, 255, 255);
     display: flex;
